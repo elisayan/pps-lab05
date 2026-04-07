@@ -5,6 +5,8 @@ import it.unibo.pps.util.Sequences.*
 import Sequence.*
 import it.unibo.pps.util.Optionals.Optional.Just
 
+import scala.annotation.tailrec
+
 // Represents a course offered on the platform
 trait Course:
   def courseId: String // Unique identifier (e.g., "CS101", "SCALA01")
@@ -138,7 +140,7 @@ class OnlineCoursePlatformImpl extends OnlineCoursePlatform {
 
   override def unenrollStudent(studentId: String, courseId: String): Unit = enrollments = removeEnrollment(enrollments, studentId, courseId)
 
-  override def getStudentEnrollments(studentId: String): Sequence[Course] = enrollments.filter((s, c) => s==studentId).map((s,c)=> c).flatMap(id => getCourse(id) match
+  override def getStudentEnrollments(studentId: String): Sequence[Course] = enrollments.filter((s, c) => s == studentId).map((s, c) => c).flatMap(id => getCourse(id) match
     case Just(course) => Cons(course, Nil())
     case _ => Nil()
   )
@@ -155,6 +157,18 @@ class OnlineCoursePlatformImpl extends OnlineCoursePlatform {
     case Cons(h, t) => Cons(h, removeEnrollment(t, studentId, courseId))
     case _ => Nil()
 }
+
+//Task 4: unapply
+object sameCategory:
+  def unapply(courses: Sequence[Course]): Option[String] = courses match
+    case Cons(h, t) =>
+      val cat = h.category
+      if check(t, cat) then Some(cat) else None
+    case Nil() => None
+
+  private def check(s: Sequence[Course], cat: String): Boolean = s match
+    case Cons(h, t) => h.category == cat && check(t, cat)
+    case _ => true
 
 @main def mainPlatform(): Unit =
   val platform = OnlineCoursePlatform()
@@ -197,3 +211,12 @@ class OnlineCoursePlatformImpl extends OnlineCoursePlatform {
   platform.removeCourse(pythonCourse)
   println(s"Is PYTHON01 available? ${platform.isCourseAvailable(pythonCourse.courseId)}") // false
   println(s"Programming courses: ${platform.findCoursesByCategory("Programming")}") // Sequence(scalaCourse)
+
+  // Test Task 4
+  val c1 = Course("1", "A", "P1", "Programming")
+  val c2 = Course("2", "B", "P2", "Programming")
+  val coursesList = Cons(c1, Cons(c2, Nil()))
+
+  coursesList match
+    case sameCategory(cat) => println(s"All courses is about: $cat")
+    case _ => println("Different category")
