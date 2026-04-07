@@ -16,7 +16,7 @@ class LogicsImpl(private val size: Int) extends Logics:
 
   override def hasElement(x: Int, y: Int): Boolean =
     (x == initial.getX && ((y - initial.getY).abs <= tickCount)) ||
-      (y == initial.getY && ((y - initial.getX).abs <= tickCount)) ||
+      (y == initial.getY && ((x - initial.getX).abs <= tickCount)) ||
       (x - y == initial.getX - initial.getY && (x - initial.getX).abs <= tickCount) ||
-      (x + y == initial.getX - initial.getY && (x - initial.getX).abs <= tickCount)
+      (x + y == initial.getX + initial.getY && (x - initial.getX).abs <= tickCount)
 
