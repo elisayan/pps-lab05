@@ -8,15 +8,20 @@ class LogicsImpl(private val size: Int) extends Logics:
 
   private var tickCount = 0
   private val random = scala.util.Random()
-  private val initial = Pair[Int, Int](random.nextInt(size - 2) + 1, random.nextInt(size - 2) + 1)
+  private val initial = Pair(random.nextInt(size - 2) + 1, random.nextInt(size - 2) + 1)
 
-  override def tick(): Unit = tickCount = tickCount + 1
+  override def tick(): Unit = tickCount += 1
 
-  override def isOver: Boolean = initial.getY - tickCount < 0 || initial.getY + tickCount >= size || initial.getX - tickCount < 0 || initial.getX + tickCount >= size
+  override def isOver: Boolean =
+    val x = initial.getX
+    val y = initial.getY
+    y - tickCount < 0 || y + tickCount >= size || x - tickCount < 0 || x + tickCount >= size
 
   override def hasElement(x: Int, y: Int): Boolean =
-    (x == initial.getX && ((y - initial.getY).abs <= tickCount)) ||
-      (y == initial.getY && ((x - initial.getX).abs <= tickCount)) ||
-      (x - y == initial.getX - initial.getY && (x - initial.getX).abs <= tickCount) ||
-      (x + y == initial.getX + initial.getY && (x - initial.getX).abs <= tickCount)
+    val dx = (x - initial.getX).abs
+    val dy = (y - initial.getY).abs
+    val isVerticalOrHorizontal = (x == initial.getX && dy <= tickCount) || (y == initial.getY && dx <= tickCount)
+    val isDiagonal = dx == dy && dx <= tickCount
+
+    isVerticalOrHorizontal || isDiagonal
 
